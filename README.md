@@ -1,6 +1,6 @@
 # 🛠️ Claude Code Skills for Dev Teams
 
-A comprehensive collection of 21 Claude Code skills designed to boost developer and TPM productivity across the entire software development lifecycle — from planning and estimating to writing code, shipping it, and managing what happens after.
+A comprehensive collection of 23 Claude Code skills designed to boost developer and TPM productivity across the entire software development lifecycle — from planning and estimating to writing code, shipping it, and managing what happens after.
 
 These skills work as `/slash-commands` in Claude Code and can also be auto-invoked by Claude when your task matches the skill's description.
 
@@ -34,6 +34,8 @@ These skills work as `/slash-commands` in Claude Code and can also be auto-invok
   - [incident-report](#19--incident-report)
   - [tech-debt-report](#20--tech-debt-report)
   - [pentest-report](#21--pentest-report)
+  - [risk-register](#22--risk-register)
+  - [vulnerability-report](#23--vulnerability-report)
 - [Supported Stacks](#-supported-stacks)
 - [Workflow Recipes](#-workflow-recipes)
 - [Customization](#-customization)
@@ -74,6 +76,8 @@ Or just ask naturally — Claude auto-detects when a skill is relevant:
 > "Should we build auth or use Clerk?"                 → triggers /build-vs-buy
 > "Is this ticket bigger than it sounds?"              → triggers /scope-check
 > "We had a production outage, write a postmortem"     → triggers /incident-report
+> "What are the project risks?"                        → triggers /risk-register
+> "Scan our packages for vulnerabilities"              → triggers /vulnerability-report
 ```
 
 ---
@@ -110,6 +114,8 @@ Or just ask naturally — Claude auto-detects when a skill is relevant:
 | 19 | `/incident-report` | Blameless postmortem generation | "we had an outage", "write a postmortem" |
 | 20 | `/tech-debt-report` | Quantify and prioritize tech debt | "how much tech debt?", "codebase health check" |
 | 21 | `/pentest-report` | OWASP-based penetration testing report | "OWASP audit", "pentest report" |
+| 22 | `/risk-register` | Living project risk tracking and assessment | "what could go wrong", "project risks" |
+| 23 | `/vulnerability-report` | Three-tier CVE dependency scan reports | "vulnerable packages", "CVE report" |
 
 ---
 
@@ -995,6 +1001,116 @@ These skills are designed for Technical Project Managers and team leads. They pr
 
 ---
 
+### 22. ⚠️ risk-register
+
+**What it does:** Creates and maintains a living project risk register by scanning the codebase, dependencies, team activity, and project history. Identifies technical, delivery, operational, and business risks, scores them by likelihood and impact, assigns owners, and tracks mitigations over time.
+
+**Best for:** Sprint planning risk reviews, project kickoffs, stakeholder reporting, quarterly health checks, pre-launch risk assessment.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-risk-register.md` (updated in-place on subsequent runs)
+
+**How to use:**
+
+```bash
+# Create or update the risk register
+/risk-register
+
+# Focus on a specific concern
+/risk-register "We're 3 weeks from launch and just lost a senior developer"
+
+# Or just ask naturally
+> "What are the risks in this project?"
+> "Create a risk register for our Q2 release"
+> "Update our risk register — we added a new third-party integration"
+> "What could go wrong before we launch?"
+```
+
+**What you get:**
+
+- **Risk summary dashboard** — count by severity with trend indicators (↑ worsening / → stable / ↓ improving)
+- **Risk heat map** — visual likelihood × impact matrix showing where all risks sit
+- **Automated risk detection** — scans codebase for bus factor, untested code, vulnerable deps, missing monitoring, secrets exposure
+- **Four risk categories** — Technical (T1-T8), Delivery (D1-D5), Operational (O1-O4), Business (B1-B4)
+- **Scored entries** — each risk rated on 1-5 likelihood × 1-5 impact with color coding (🟢🟡🟠🔴)
+- **Response strategy per risk** — Avoid, Mitigate, Transfer, Accept, or Contingency
+- **Mitigation actions** — specific actions with owners and due dates
+- **Trend tracking** — how each risk has changed over time across reviews
+- **Realized risks** — risks that became actual incidents, linked to incident reports
+- **Risk metrics** — total open, average score, mean time to mitigate, overdue count
+- **Review cadence** — recommended sprint/monthly/quarterly review schedule
+
+**Auto-flags as 🔴 Critical:**
+- Dependencies with critical CVEs
+- Secrets committed to git
+- Zero test coverage on auth/payment code
+- Key person dependency on critical path
+- Deadline < 2 weeks with > 30% scope incomplete
+
+---
+
+### 23. 🛡️ vulnerability-report
+
+**What it does:** Scans ALL project dependencies across every package ecosystem (npm, pip, Go, Ruby, PHP, Rust, Docker) for known CVEs, and generates three separate severity-tiered reports with full remediation guidance.
+
+**Best for:** Security reviews, compliance audits, sprint planning (prioritizing fixes), dependency update cycles, CI/CD integration.
+
+**Output:** Generates THREE files:
+- `project-decisions/YYYY-MM-DD-vulnerabilities-high.md` — 🔴 Critical & High (fix within 48 hours)
+- `project-decisions/YYYY-MM-DD-vulnerabilities-medium.md` — 🟡 Medium (fix within 2 weeks)
+- `project-decisions/YYYY-MM-DD-vulnerabilities-low.md` — 🟢 Low (fix when convenient)
+
+**How to use:**
+
+```bash
+# Full dependency vulnerability scan
+/vulnerability-report
+
+# Or just ask naturally
+> "Scan our dependencies for vulnerabilities"
+> "Generate a CVE report for our packages"
+> "What vulnerable packages do we have?"
+> "Run a dependency security scan"
+```
+
+**What you get per report:**
+
+- **Executive summary** — vulnerability count, auto-fixable count, direct vs transitive breakdown
+- **Quick fix commands** — copy-paste `npm audit fix`, `pip install --upgrade`, etc.
+- **Detailed findings** — each vulnerability with:
+  - Package name, installed version, fixed version
+  - CVE ID, CVSS score and vector, CWE classification
+  - Direct vs transitive dependency chain
+  - Reachability analysis (is the vulnerable code actually called?)
+  - Exploit availability (PoC exists? actively exploited?)
+  - Remediation with exact commands and verification steps
+- **Dependency health metrics** — outdated packages, deprecated packages, unpinned versions, lockfile status
+- **Remediation priority table** — ranked by CVSS score, fix availability, and reachability
+- **Cross-report links** — each report links to the other two severity tiers
+- **Automation recommendations** — GitHub Actions / GitLab CI config for automated scanning, Dependabot/Renovate setup
+
+**Ecosystems scanned:**
+
+| Ecosystem | Scanner | Lockfile |
+|-----------|---------|----------|
+| Node.js (npm/yarn/pnpm) | `npm audit` | package-lock.json, yarn.lock, pnpm-lock.yaml |
+| Python (pip/poetry) | `pip-audit`, `safety` | requirements.txt, poetry.lock |
+| Go | `govulncheck` | go.sum |
+| Ruby | `bundler-audit` | Gemfile.lock |
+| PHP | `composer audit` | composer.lock |
+| Rust | `cargo audit` | Cargo.lock |
+| Docker | Base image version check | Dockerfile |
+
+**When to use which security skill:**
+
+| Skill | Scope | Use When |
+|-------|-------|----------|
+| `/security-audit` | Source code vulnerabilities | Quick check during development or before a PR |
+| `/pentest-report` | Full OWASP application assessment | Formal compliance audits, stakeholder reporting |
+| `/vulnerability-report` | Dependency/package CVEs | Dependency update cycles, CI/CD security gates |
+| `/risk-register` | All project risks (including security) | Sprint planning, project-level risk management |
+
+---
+
 ## 🔧 Supported Stacks
 
 These skills include stack-specific checks and patterns for:
@@ -1068,8 +1184,10 @@ These skills include stack-specific checks and patterns for:
 ### Security & Compliance Review
 
 ```bash
-/security-audit                 # Quick scan for vulnerabilities
+/security-audit                 # Quick scan for source code vulnerabilities
+/vulnerability-report           # Three-tier dependency CVE reports
 /pentest-report                 # Formal OWASP-based assessment
+/risk-register                  # Update project risk register with findings
 ```
 
 ### Creating a Pre-Deploy Command
@@ -1154,17 +1272,22 @@ Add to your project's `CLAUDE.md` to improve auto-invocation:
 - `/incident-report` - Blameless postmortem generation
 - `/tech-debt-report` - Quantify and prioritize tech debt
 - `/pentest-report` - OWASP-based penetration testing report
+- `/risk-register` - Living project risk tracking and assessment
+- `/vulnerability-report` - Three-tier dependency CVE scan reports
 ```
 
 ---
 
 ## ❓ FAQ
 
-**Q: Do I need all 21 skills?**
-No. Start with the 3-4 you'd use most. For dev teams, `/code-review`, `/write-tests`, `/create-pr`, and `/security-audit` give the most immediate value. For TPMs, start with `/estimate`, `/scope-check`, and `/tech-decision`.
+**Q: Do I need all 23 skills?**
+No. Start with the 3-4 you'd use most. For dev teams, `/code-review`, `/write-tests`, `/create-pr`, and `/security-audit` give the most immediate value. For TPMs, start with `/estimate`, `/scope-check`, and `/tech-decision`. For security, start with `/vulnerability-report` and `/security-audit`.
 
 **Q: What's the `project-decisions/` folder?**
-The TPM skills (14-21) save their output as markdown files in `project-decisions/` at your project root. Over time this becomes a searchable history of every technical decision, estimate, incident, and scope analysis your team has made. Commit it to Git so the whole team has access.
+The TPM and security skills (14-23) save their output as markdown files in `project-decisions/` at your project root. Over time this becomes a searchable history of every technical decision, estimate, incident, risk assessment, and vulnerability scan your team has made. Commit it to Git so the whole team has access.
+
+**Q: The vulnerability report generates three files — why?**
+Each severity tier has a different audience and action timeline. The High report goes to security leads and needs fixing within 48 hours. The Medium report is for sprint planning. The Low report is for batching with regular dependency updates. Splitting them prevents alert fatigue and lets each audience focus on what matters to them.
 
 **Q: Will these slow down Claude Code?**
 Skill descriptions are loaded into context so Claude knows what's available. If you have many skills, they may use context budget. Run `/context` to check. You can set `SLASH_COMMAND_TOOL_CHAR_BUDGET` to adjust the limit.
@@ -1255,14 +1378,22 @@ To add or improve a skill:
 │   └── SKILL.md
 ├── tech-debt-report/
 │   └── SKILL.md
-└── pentest-report/
+├── pentest-report/
+│   └── SKILL.md
+├── risk-register/
+│   └── SKILL.md
+└── vulnerability-report/
     └── SKILL.md
 
-project-decisions/          ← Auto-generated by TPM skills
+project-decisions/          ← Auto-generated by TPM & security skills
 ├── README.md               ← Auto-updated index of all decisions
 ├── 2026-02-19-bigquery-vs-looker.md
 ├── 2026-02-19-scope-notifications.md
 ├── 2026-02-19-incident-payment-outage.md
+├── 2026-02-19-risk-register.md
+├── 2026-02-19-vulnerabilities-high.md
+├── 2026-02-19-vulnerabilities-medium.md
+├── 2026-02-19-vulnerabilities-low.md
 └── ...
 ```
 
@@ -1274,4 +1405,4 @@ MIT
 
 ---
 
-**Built with ❤️ for dev teams and TPMs who want to ship better code, faster — and make smarter decisions along the way.**
+**Built with ❤️ for dev teams and TPMs who want to ship better code, faster — and make smarter, safer decisions along the way.**
