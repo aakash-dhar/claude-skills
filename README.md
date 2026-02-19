@@ -1,6 +1,6 @@
 # 🛠️ Claude Code Skills for Dev Teams
 
-A comprehensive collection of 12 Claude Code skills designed to boost developer productivity across the entire software development lifecycle — from writing code to shipping it.
+A comprehensive collection of 21 Claude Code skills designed to boost developer and TPM productivity across the entire software development lifecycle — from planning and estimating to writing code, shipping it, and managing what happens after.
 
 These skills work as `/slash-commands` in Claude Code and can also be auto-invoked by Claude when your task matches the skill's description.
 
@@ -11,7 +11,7 @@ These skills work as `/slash-commands` in Claude Code and can also be auto-invok
 - [Quick Start](#-quick-start)
 - [Skills Overview](#-skills-overview)
 - [Installation](#-installation)
-- [Skills Reference](#-skills-reference)
+- [Skills Reference — Development](#-skills-reference--development)
   - [explain-code](#1--explain-code)
   - [code-review](#2--code-review)
   - [optimize](#3--optimize)
@@ -25,6 +25,15 @@ These skills work as `/slash-commands` in Claude Code and can also be auto-invok
   - [create-pr](#11--create-pr)
   - [changelog](#12--changelog)
   - [create-ticket](#13--create-ticket)
+- [Skills Reference — TPM & Project Management](#-skills-reference--tpm--project-management)
+  - [estimate](#14--estimate)
+  - [tech-decision](#15--tech-decision)
+  - [impact-analysis](#16--impact-analysis)
+  - [scope-check](#17--scope-check)
+  - [build-vs-buy](#18--build-vs-buy)
+  - [incident-report](#19--incident-report)
+  - [tech-debt-report](#20--tech-debt-report)
+  - [pentest-report](#21--pentest-report)
 - [Supported Stacks](#-supported-stacks)
 - [Workflow Recipes](#-workflow-recipes)
 - [Customization](#-customization)
@@ -62,11 +71,16 @@ Or just ask naturally — Claude auto-detects when a skill is relevant:
 > "This function is really slow, can you help?"        → triggers /optimize
 > "I'm new to this project, walk me through it"        → triggers /explain-codebase
 > "Write tests for the auth module"                    → triggers /write-tests
+> "Should we build auth or use Clerk?"                 → triggers /build-vs-buy
+> "Is this ticket bigger than it sounds?"              → triggers /scope-check
+> "We had a production outage, write a postmortem"     → triggers /incident-report
 ```
 
 ---
 
 ## 📦 Skills Overview
+
+### Development Skills
 
 | # | Skill | Purpose | Trigger Examples |
 |---|-------|---------|-----------------|
@@ -83,6 +97,19 @@ Or just ask naturally — Claude auto-detects when a skill is relevant:
 | 11 | `/create-pr` | Prepare and submit pull requests | "create a PR", "submit for review" |
 | 12 | `/changelog` | Generate release notes | "what changed?", "release notes" |
 | 13 | `/create-ticket` | Turn ideas into structured tickets | "log a bug", "create a ticket" |
+
+### TPM & Project Management Skills
+
+| # | Skill | Purpose | Trigger Examples |
+|---|-------|---------|-----------------|
+| 14 | `/estimate` | Effort estimation with breakdown | "how long will this take?", "size this ticket" |
+| 15 | `/tech-decision` | Evaluate "should we do X?" proposals | "should we switch to", "compare X vs Y" |
+| 16 | `/impact-analysis` | Map blast radius of proposed changes | "what would break if", "who is impacted" |
+| 17 | `/scope-check` | Detect hidden complexity and scope creep | "is this bigger than it sounds?", "check this spec" |
+| 18 | `/build-vs-buy` | Build in-house vs adopt vendor analysis | "should we build our own", "roll our own or use" |
+| 19 | `/incident-report` | Blameless postmortem generation | "we had an outage", "write a postmortem" |
+| 20 | `/tech-debt-report` | Quantify and prioritize tech debt | "how much tech debt?", "codebase health check" |
+| 21 | `/pentest-report` | OWASP-based penetration testing report | "OWASP audit", "pentest report" |
 
 ---
 
@@ -137,7 +164,7 @@ to see all available commands including your installed skills.
 
 ---
 
-## 📖 Skills Reference
+## 📖 Skills Reference — Development
 
 ---
 
@@ -654,6 +681,320 @@ All tickets include: acceptance criteria, subtasks, dependencies, estimates, and
 
 ---
 
+## 📖 Skills Reference — TPM & Project Management
+
+These skills are designed for Technical Project Managers and team leads. They produce structured analysis documents saved to `project-decisions/` in your project root, building a searchable decision history over time.
+
+---
+
+### 14. 🎯 estimate
+
+**What it does:** Estimates effort for tasks and tickets by analyzing code complexity, dependencies, scope, risk, and historical patterns. Supports T-shirt sizing, story points, time ranges, and task-based estimates.
+
+**Best for:** Sprint planning, backlog grooming, timeline forecasting, answering "can we fit this in the sprint?"
+
+**How to use:**
+
+```bash
+# Estimate a feature
+/estimate "Add OAuth2 login with Google and GitHub"
+
+# Estimate from a ticket
+/estimate "Migrate from REST to GraphQL for the user service"
+
+# Or just ask naturally
+> "How long would it take to add dark mode?"
+> "Size this ticket for me"
+> "Can we fit this in the current sprint?"
+```
+
+**What you get:**
+
+- **Task breakdown** — decomposed subtasks with individual estimates
+- **Multiple estimation methods** — T-shirt, story points (Fibonacci), time ranges (PERT), task-based
+- **Risk assessment** — factors that could inflate the estimate with multipliers
+- **Confidence level** — High (±10%), Medium (±25%), Low (±50%) with range
+- **Historical comparison** — past similar work and how long it actually took
+- **Sprint fit analysis** — does it fit in remaining capacity?
+- **Decomposition recommendations** — how to split if it's too large
+
+---
+
+### 15. 🧭 tech-decision
+
+**What it does:** Evaluates technical proposals and "should we do X instead of Y?" questions. Analyzes feasibility, compares options with structured pros/cons, estimates effort and risk, and provides a clear recommendation.
+
+**Best for:** Evaluating team proposals, technical direction decisions, tool/approach comparisons.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-[topic].md`
+
+**How to use:**
+
+```bash
+# Evaluate a proposal
+/tech-decision "Should we migrate from REST to GraphQL for our user service?"
+
+# Evaluate a team suggestion
+/tech-decision "Dan thinks we should hook up an agent to BigQuery instead of Looker Studio"
+
+# Or just ask naturally
+> "Should we switch from Webpack to Vite?"
+> "Is it worth migrating to Next.js 15?"
+> "Compare PostgreSQL vs DynamoDB for our events table"
+```
+
+**What you get:**
+
+- **Decision framing** — clear statement of what's being decided and constraints
+- **3+ options compared** — always includes status quo and at least one alternative
+- **Feasibility analysis** — can we actually do this?
+- **Effort & timeline** — phased breakdown for each option
+- **Cost analysis** — one-time and ongoing costs compared
+- **Risk assessment** — per-option risk register with mitigations
+- **Weighted comparison matrix** — scored across 7 criteria
+- **Clear recommendation** — Go / Spike First / Defer / Don't Do with reasoning
+- **Next steps** — actionable plan based on the recommendation
+
+---
+
+### 16. 💥 impact-analysis
+
+**What it does:** Maps the full blast radius of a proposed change — which code, APIs, databases, services, infrastructure, teams, and workflows are affected. Detects breaking changes and produces a rollout strategy.
+
+**Best for:** Pre-implementation planning, change management, preventing surprises in production.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-impact-[topic].md`
+
+**How to use:**
+
+```bash
+# Analyze a proposed change
+/impact-analysis "Renaming the users table to accounts"
+
+# Analyze a migration
+/impact-analysis "Replacing our custom auth with Clerk"
+
+# Or just ask naturally
+> "What would break if we change the order status from string to enum?"
+> "What's the blast radius of upgrading to Next.js 15?"
+> "Who is impacted if we remove the v1 API?"
+```
+
+**What you get:**
+
+- **Blast radius summary** — files, endpoints, tables, services, teams affected (quantified)
+- **Dependency graph** — ASCII diagram showing direct and transitive dependencies
+- **Breaking change detection** — API, database, and library breaking changes flagged
+- **Team & people impact** — who needs to know and what they need to do
+- **Communication plan** — when and how to notify affected parties
+- **Migration & rollout strategy** — phased plan for breaking changes
+- **Rollback plan** — how to revert if things go wrong
+- **Risk matrix** — impact vs likelihood with mitigation strategies
+- **Change-type checklist** — API, database, service, infrastructure, or library specific
+
+---
+
+### 17. 🔎 scope-check
+
+**What it does:** Analyzes feature specs, tickets, and PRDs for hidden complexity, scope creep risks, missing requirements, ambiguous language, unstated assumptions, and unrealistic timelines.
+
+**Best for:** Pre-sprint commitment review, catching "2-week projects" that are really 3-month projects, improving spec quality.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-scope-[topic].md`
+
+**How to use:**
+
+```bash
+# Check a feature spec
+/scope-check "Add real-time notifications — should be a simple WebSocket integration, probably 3-4 days"
+
+# Check a ticket
+/scope-check "JIRA-456: search products by name, category, and price range. Estimate: 5 points"
+
+# Or just ask naturally
+> "Is this ticket bigger than it sounds?"
+> "Sanity check this PRD before we commit"
+> "What are we missing in this feature spec?"
+> "Can we really do this in 2 weeks?"
+```
+
+**What you get:**
+
+- **Verdict** — 🟢 Realistic / 🟡 Needs Refinement / 🟠 Underscoped / 🔴 Unrealistic
+- **Red flags** — critical, warning, and minor flags with specific explanations
+- **Hidden complexity** — what the spec says vs what it actually requires (with effort delta)
+- **Hidden icebergs** — common features that are 5x harder than they sound
+- **Missing requirements checklist** — functional, non-functional, design, operational, delivery
+- **Unstated assumptions** — assumptions the spec relies on that haven't been validated
+- **Effort multipliers** — spec clarity, team experience, dependencies, data changes
+- **Scope reduction recommendations** — MoSCoW prioritization, phased delivery, cut suggestions
+- **Questions to resolve** — specific questions that must be answered before committing
+
+---
+
+### 18. ⚖️ build-vs-buy
+
+**What it does:** Compares building a solution internally versus buying/adopting a third-party tool or service. Analyzes total cost of ownership, effort, risk, vendor lock-in, feature fit, and strategic alignment.
+
+**Best for:** Evaluating "should we roll our own or use a service?", vendor selection, make-or-buy decisions.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-build-vs-buy-[topic].md`
+
+**How to use:**
+
+```bash
+# Compare build vs buy
+/build-vs-buy "Should we build our own auth or use Clerk/Auth0?"
+
+# Evaluate vendor options
+/build-vs-buy "We need full-text search — Elasticsearch self-hosted vs Algolia?"
+
+# Or just ask naturally
+> "Should we roll our own email sending or use SendGrid?"
+> "Build or buy for our analytics dashboard?"
+> "Should we self-host Sentry or use their cloud?"
+```
+
+**What you get:**
+
+- **Problem framing** — requirements, constraints, and success criteria
+- **3+ options evaluated** — Build, Buy (Vendor A), Buy (Vendor B), OSS, Hybrid
+- **Feature fit matrix** — must-have and nice-to-have requirements per option
+- **3-year TCO comparison** — development, infrastructure, maintenance, hidden costs
+- **Time to value** — how fast each option delivers a working solution
+- **Risk assessment** — build risks, buy risks, OSS risks with mitigations
+- **Vendor lock-in score** — data portability, API standards, contract terms
+- **Strategic alignment** — is this a differentiator or a commodity?
+- **Vendor health check** — funding, customer count, certifications, SLA, support quality
+- **Weighted comparison matrix** — scored across 8 criteria
+- **Implementation plan** — phased plan for the recommended option
+- **Exit strategy** — how to switch if the decision needs to be reversed
+
+---
+
+### 19. 🚨 incident-report
+
+**What it does:** Generates blameless postmortem reports by analyzing git history, recent deployments, code changes, and error patterns. Produces a structured report with timeline, root cause analysis, impact assessment, and action items.
+
+**Best for:** Production incidents, outage postmortems, compliance-required incident documentation.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-incident-[topic].md`
+
+**How to use:**
+
+```bash
+# Generate an incident report
+/incident-report "Payment processing went down for 2 hours yesterday"
+
+# Analyze a specific issue
+/incident-report "Users reporting 500 errors on login since this morning's deploy"
+
+# Or just ask naturally
+> "Write a postmortem for the database outage"
+> "We need an RCA for the webhook failures"
+> "Document what happened with the payment processing incident"
+```
+
+**What you get:**
+
+- **Executive summary** — what happened, impact, root cause, what we're doing about it
+- **Severity classification** — SEV-1 through SEV-4 with category
+- **Precise timeline** — minute-by-minute events from trigger to resolution
+- **Key metrics** — time to detect, respond, mitigate, and resolve
+- **Root cause analysis** — 5 Whys technique drilling to systemic causes
+- **Contributing factors** — all factors that combined to cause the incident
+- **Impact assessment** — users affected, requests failed, revenue impact, SLA impact
+- **Response evaluation** — what went well, what didn't, where we got lucky
+- **Action items** — prioritized by urgency (immediate, short-term, medium-term) with owners
+- **Lessons learned** — key takeaways and how to apply them
+- **Recurring incident check** — is this a pattern? Were previous actions completed?
+
+---
+
+### 20. 🏥 tech-debt-report
+
+**What it does:** Quantifies technical debt across the codebase by scanning for code complexity, outdated dependencies, missing tests, TODOs, dead code, architectural issues, and change hotspots. Produces a prioritized remediation roadmap.
+
+**Best for:** Sprint planning (20% debt budget), leadership reporting, quarterly health checks, making the case for debt paydown.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-tech-debt-report.md`
+
+**How to use:**
+
+```bash
+# Full codebase health check
+/tech-debt-report
+
+# Check a specific area
+/tech-debt-report src/services/
+
+# Or just ask naturally
+> "How much tech debt do we have?"
+> "Give me a health check on the codebase"
+> "What's the state of our codebase?"
+> "Generate a tech debt report for the leadership review"
+```
+
+**What you get:**
+
+- **Overall debt score** — X/10 with health rating (🟢 Healthy → 🔴 Critical)
+- **9 category breakdown** — complexity, TODOs, dependencies, tests, docs, dead code, config, architecture, hotspots
+- **Specific findings** — file names, line counts, exact numbers (not vague descriptions)
+- **Trend analysis** — is debt increasing or decreasing over the last 6 months?
+- **Bus factor report** — files only one person has ever changed
+- **Change hotspot analysis** — most-changed files that also have the most bugs
+- **Remediation roadmap** — quick wins (< 1 day), sprint-sized (1-5 days), large efforts (1-4 weeks)
+- **Sprint allocation plan** — recommended 20% debt budget with specific items per sprint
+- **Projected improvement** — debt score reduction after 1, 3, and 6 sprints
+
+---
+
+### 21. 🛡️ pentest-report
+
+**What it does:** Generates a structured penetration testing report based on OWASP standards. Scans code for vulnerabilities, maps findings to OWASP Top 10 (2021), checks ASVS compliance, assigns CVSS v3.1 scores, and produces a professional security assessment.
+
+**Best for:** Compliance reviews, pre-audit preparation, stakeholder security reporting, formal security assessments.
+
+**Output:** Saved to `project-decisions/YYYY-MM-DD-pentest-[topic].md`
+
+**How to use:**
+
+```bash
+# Full OWASP assessment
+/pentest-report
+
+# Assess a specific area
+/pentest-report src/api/
+
+# Or just ask naturally
+> "Run an OWASP security assessment"
+> "Generate a penetration testing report"
+> "Check OWASP Top 10 compliance"
+> "OWASP ASVS Level 2 compliance check"
+```
+
+**What you get:**
+
+- **Executive summary** — overall risk rating, finding count by severity, key findings table
+- **OWASP Top 10 coverage** — each category tested with specific checks and findings
+- **CVSS v3.1 scoring** — every finding scored with attack vector, complexity, and impact
+- **ASVS compliance matrix** — Level 1/2/3 verification requirements with pass/fail status
+- **Detailed findings** — description, evidence (code), impact, proof of concept, remediation (code), CWE reference
+- **Remediation roadmap** — immediate (0-48h), short-term (1-2 weeks), medium-term (1 month), long-term
+- **Positive findings** — security controls that ARE properly implemented
+- **Recommendations** — quick wins, process improvements, architecture improvements
+
+**Methodology:** OWASP WSTG v4.2, OWASP Top 10 (2021), OWASP ASVS v4.0, CVSS v3.1
+
+**When to use which security skill:**
+
+| Skill | Use When |
+|-------|----------|
+| `/security-audit` | Quick security check during development or before a PR |
+| `/pentest-report` | Formal assessment for compliance, audits, or stakeholder reporting |
+
+---
+
 ## 🔧 Supported Stacks
 
 These skills include stack-specific checks and patterns for:
@@ -699,10 +1040,36 @@ These skills include stack-specific checks and patterns for:
 ### Paying Down Tech Debt
 
 ```bash
+/tech-debt-report                # Quantify what needs fixing
 /refactor src/services/         # Find code smells
 /optimize src/api/              # Find performance issues
 /test-coverage src/services/    # Find missing tests
 /write-tests src/services/auth  # Generate the missing tests
+```
+
+### Evaluating a Technical Proposal
+
+```bash
+/scope-check "the feature spec"              # Is it bigger than it sounds?
+/tech-decision "should we use X or Y?"       # Evaluate the options
+/impact-analysis "implementing option X"     # Map the blast radius
+/estimate "implement the chosen approach"    # Estimate the effort
+/build-vs-buy "build or use a vendor?"       # If relevant
+```
+
+### After a Production Incident
+
+```bash
+/incident-report "description of what happened"   # Blameless postmortem
+/tech-decision "should we add circuit breakers?"   # Evaluate the fix
+/impact-analysis "implementing the fix"            # Map what's affected
+```
+
+### Security & Compliance Review
+
+```bash
+/security-audit                 # Quick scan for vulnerabilities
+/pentest-report                 # Formal OWASP-based assessment
 ```
 
 ### Creating a Pre-Deploy Command
@@ -763,7 +1130,7 @@ Produce a unified report.
 Add to your project's `CLAUDE.md` to improve auto-invocation:
 
 ```markdown
-## Available Skills
+## Available Skills — Development
 - `/explain-code` - Explains code with diagrams and analogies
 - `/code-review` - Code quality review with severity ratings
 - `/optimize` - Performance analysis and fix suggestions
@@ -777,14 +1144,27 @@ Add to your project's `CLAUDE.md` to improve auto-invocation:
 - `/create-pr` - Pull request preparation and submission
 - `/changelog` - Release notes generation
 - `/create-ticket` - Structured ticket creation
+
+## Available Skills — TPM & Project Management
+- `/estimate` - Effort estimation with breakdown and sprint fit
+- `/tech-decision` - Evaluate technical proposals and options
+- `/impact-analysis` - Map blast radius of proposed changes
+- `/scope-check` - Detect hidden complexity and scope creep
+- `/build-vs-buy` - Build in-house vs adopt vendor analysis
+- `/incident-report` - Blameless postmortem generation
+- `/tech-debt-report` - Quantify and prioritize tech debt
+- `/pentest-report` - OWASP-based penetration testing report
 ```
 
 ---
 
 ## ❓ FAQ
 
-**Q: Do I need all 12 skills?**
-No. Start with the 3-4 you'd use most. For most teams, `/code-review`, `/write-tests`, `/create-pr`, and `/security-audit` give the most immediate value.
+**Q: Do I need all 21 skills?**
+No. Start with the 3-4 you'd use most. For dev teams, `/code-review`, `/write-tests`, `/create-pr`, and `/security-audit` give the most immediate value. For TPMs, start with `/estimate`, `/scope-check`, and `/tech-decision`.
+
+**Q: What's the `project-decisions/` folder?**
+The TPM skills (14-21) save their output as markdown files in `project-decisions/` at your project root. Over time this becomes a searchable history of every technical decision, estimate, incident, and scope analysis your team has made. Commit it to Git so the whole team has access.
 
 **Q: Will these slow down Claude Code?**
 Skill descriptions are loaded into context so Claude knows what's available. If you have many skills, they may use context budget. Run `/context` to check. You can set `SLASH_COMMAND_TOOL_CHAR_BUDGET` to adjust the limit.
@@ -831,6 +1211,8 @@ To add or improve a skill:
 
 ```
 .claude/skills/
+│
+│── Development Skills
 ├── explain-code/
 │   └── SKILL.md
 ├── code-review/
@@ -855,8 +1237,33 @@ To add or improve a skill:
 │   └── SKILL.md
 ├── changelog/
 │   └── SKILL.md
-└── create-ticket/
+├── create-ticket/
+│   └── SKILL.md
+│
+│── TPM & Project Management Skills
+├── estimate/
+│   └── SKILL.md
+├── tech-decision/
+│   └── SKILL.md
+├── impact-analysis/
+│   └── SKILL.md
+├── scope-check/
+│   └── SKILL.md
+├── build-vs-buy/
+│   └── SKILL.md
+├── incident-report/
+│   └── SKILL.md
+├── tech-debt-report/
+│   └── SKILL.md
+└── pentest-report/
     └── SKILL.md
+
+project-decisions/          ← Auto-generated by TPM skills
+├── README.md               ← Auto-updated index of all decisions
+├── 2026-02-19-bigquery-vs-looker.md
+├── 2026-02-19-scope-notifications.md
+├── 2026-02-19-incident-payment-outage.md
+└── ...
 ```
 
 ---
@@ -867,4 +1274,4 @@ MIT
 
 ---
 
-**Built with ❤️ for dev teams who want to ship better code, faster.**
+**Built with ❤️ for dev teams and TPMs who want to ship better code, faster — and make smarter decisions along the way.**
